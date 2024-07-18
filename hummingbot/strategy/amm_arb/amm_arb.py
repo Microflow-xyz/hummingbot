@@ -222,7 +222,7 @@ class AmmArbStrategy(StrategyPyBase):
             t.copy() for t in self._all_arb_proposals
             if t.profit_pct(
                 rate_source=self._rate_source,
-                account_for_fee=True,
+                account_for_fee=False,
             ) >= self._min_profitability
         ]
         if len(profitable_arb_proposals) == 0:
@@ -398,7 +398,7 @@ class AmmArbStrategy(StrategyPyBase):
             market_2_name: str = proposal.second_side.market_info.market.display_name
             profit_pct = proposal.profit_pct(
                 rate_source=self._rate_source,
-                account_for_fee=True,
+                account_for_fee=False,
             )
             lines.append(f"{'    ' if indented else ''}{side1} at {market_1_name}"
                          f", {side2} at {market_2_name}: "
