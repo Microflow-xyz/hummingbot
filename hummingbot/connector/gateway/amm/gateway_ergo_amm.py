@@ -1,6 +1,7 @@
 import asyncio
+import itertools as it
 from decimal import Decimal
-from typing import List, Optional, TYPE_CHECKING, Any, Dict
+from typing import List, Optional, TYPE_CHECKING, Any, Dict, Union
 from hummingbot.connector.gateway.amm.gateway_evm_amm import GatewayEVMAMM
 from hummingbot.core.data_type.cancellation_result import CancellationResult
 from hummingbot.core.utils import async_ttl_cache
@@ -237,3 +238,17 @@ class GatewayErgoAMM(GatewayEVMAMM):
                     app_warning_msg=f"Failed to fetch transaction status for the order {tracked_order.client_order_id}. Please wait at least 2 minutes!"
                 )
                 await self._order_tracker.process_order_not_found(tracked_order.client_order_id)
+
+    async def all_trading_pairs(self) -> List[str]:
+        """
+        Calls the tokens endpoint on Gateway.
+        """
+        try:
+            tokens = await GatewayHttpClient.get_instance().get_tokens(network=self._network, chain=self.chain)
+            token_symbols = [t["symbol"] for t in tokens["assets"]]
+            trading_pairs = []
+            for base, quote in it.permutations(token_symbols, 2):
+                trading_pairs.append(f"{base}-{quote}")
+            return trading_pairs
+        except Exception:
+            return []
